@@ -101,7 +101,7 @@ init_db()
 @dp.message(Command("start"))
 async def start(msg: types.Message):
     await msg.answer(
-        "FTOT VPN\nВыберите тариф:",
+        "FTOT VPN [v2]\nВыберите тариф:",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text=TARIFF_LABELS["1m"], callback_data="tariff_1m")],
             [InlineKeyboardButton(text=TARIFF_LABELS["3m"], callback_data="tariff_3m")],

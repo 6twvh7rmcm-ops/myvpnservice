@@ -295,6 +295,70 @@ async def activate_sub(msg: types.Message):
         await msg.answer(f"Не удалось отправить сообщение пользователю {user_id} (возможно, он не запускал бота)")
 
 
+# ---------------- ВЫДАЧА КОНФИГА (АДМИН) ----------------
+
+@dp.message(Command("sendconfig"))
+async def send_config_text(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID:
+        await msg.answer("Доступ запрещён")
+        return
+
+    parts = msg.text.split(maxsplit=2)
+    if len(parts) < 3:
+        await msg.answer(
+            "Использование:\n"
+            "Текстовый конфиг (ссылка VLESS/Outline и т.п.):\n"
+            "/sendconfig <user_id> <текст конфига>\n\n"
+            "Файл конфига: прикрепите файл к сообщению и в подписи (caption) "
+            "напишите: /sendconfig <user_id>"
+        )
+        return
+
+    try:
+        user_id = int(parts[1])
+    except ValueError:
+        await msg.answer("user_id должен быть числом")
+        return
+
+    config_text = parts[2]
+
+    try:
+        await bot.send_message(
+            user_id,
+            f"🔑 Ваш конфиг FTOT VPN:\n\n{config_text}"
+        )
+        await msg.answer(f"Конфиг отправлен пользователю {user_id}")
+    except Exception:
+        await msg.answer(f"Не удалось отправить сообщение пользователю {user_id} (возможно, он не запускал бота)")
+
+
+@dp.message(F.document, F.caption.startswith("/sendconfig"))
+async def send_config_file(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID:
+        return
+
+    parts = msg.caption.split()
+    if len(parts) < 2:
+        await msg.answer("Использование: прикрепите файл, в подписи напишите /sendconfig <user_id>")
+        return
+
+    try:
+        user_id = int(parts[1])
+    except ValueError:
+        await msg.answer("user_id должен быть числом")
+        return
+
+    try:
+        await bot.send_document(
+            user_id,
+            msg.document.file_id,
+            caption="🔑 Ваш конфиг FTOT VPN"
+        )
+        await msg.answer(f"Файл конфига отправлен пользователю {user_id}")
+    except Exception:
+        await msg.answer(f"Не удалось отправить файл пользователю {user_id} (возможно, он не запускал бота)")
+
+
 # ---------------- ФОНОВАЯ ПРОВЕРКА ИСТЕЧЕНИЯ ПОДПИСОК ----------------
 
 async def check_expiring_subscriptions():
